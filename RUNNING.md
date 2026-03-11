@@ -259,3 +259,255 @@ docker compose up -d --build account-service
 ```
 
 If you change the Angular frontend, the dev server (`npm start`) hot-reloads automatically — no restart needed.
+
+---
+
+## Running Locally (Without Docker)
+
+Use this approach when you want to run and debug individual services directly on your machine — for example, in IntelliJ or VS Code — rather than inside containers.
+
+The strategy is:
+- **Infrastructure** (MySQL, Redis, Kafka) still runs in Docker — starting 11 lightweight containers is much easier than installing each tool natively.
+- **Spring Boot services** and the **Angular frontend** run directly on your machine.
+
+---
+
+### Local Prerequisites
+
+Everything from the main prerequisites table, plus:
+
+| Tool | Purpose |
+|------|---------|
+| MySQL 8.0 client (`mysql` CLI) | Verify DB connectivity |
+| A Java IDE (IntelliJ IDEA / VS Code + Extension Pack for Java) | Recommended for debugging |
+
+---
+
+### Local Step 1 — Start Only the Infrastructure Containers
+
+```bash
+docker compose up -d \
+  mysql-auth mysql-user mysql-account mysql-transaction \
+  mysql-beneficiary mysql-notification mysql-fraud mysql-audit \
+  redis zookeeper kafka
+```
+
+Wait for all containers to become healthy (~30 seconds):
+
+```bash
+docker compose ps
+```
+
+Verify MySQL is accessible (password is `Admin@123`):
+
+```bash
+mysql -h 127.0.0.1 -P 3306 -u root -pAdmin@123 -e "SHOW DATABASES;"
+```
+
+---
+
+### Local Step 2 — Start Config Server
+
+Open a dedicated terminal window for each service below, or run them as IDE run configurations.
+
+```bash
+cd backend/infrastructure/config-server
+mvn spring-boot:run
+```
+
+Wait until you see:
+```
+Started ConfigServerApplication in X.XXX seconds
+```
+
+Verify:
+```bash
+curl http://localhost:8888/actuator/health
+# {"status":"UP"}
+```
+
+---
+
+### Local Step 3 — Start Service Discovery (Eureka)
+
+New terminal:
+
+```bash
+cd backend/infrastructure/service-discovery
+mvn spring-boot:run
+```
+
+Verify at http://localhost:8761 — the Eureka dashboard should load.
+
+---
+
+### Local Step 4 — Start the 8 Microservices
+
+Start each in its own terminal. They can be started in parallel once Eureka is up.
+
+```bash
+# Terminal A
+cd backend/services/auth-service
+mvn spring-boot:run
+
+# Terminal B
+cd backend/services/user-service
+mvn spring-boot:run
+
+# Terminal C
+cd backend/services/account-service
+mvn spring-boot:run
+
+# Terminal D
+cd backend/services/transaction-service
+mvn spring-boot:run
+
+# Terminal E
+cd backend/services/beneficiary-service
+mvn spring-boot:run
+
+# Terminal F
+cd backend/services/notification-service
+mvn spring-boot:run
+
+# Terminal G
+cd backend/services/fraud-service
+mvn spring-boot:run
+
+# Terminal H
+cd backend/services/audit-service
+mvn spring-boot:run
+```
+
+Each service connects to its own MySQL container on `localhost` (ports 3306–3313) using the defaults in `application.yml` (`root` / `Admin@123`).
+
+After all services start, refresh http://localhost:8761 — all 8 services should appear as **UP**.
+
+---
+
+### Local Step 5 — Start the API Gateway
+
+New terminal:
+
+```bash
+cd backend/infrastructure/api-gateway
+mvn spring-boot:run
+```
+
+Verify:
+```bash
+curl http://localhost:8080/actuator/health
+# {"status":"UP"}
+```
+
+---
+
+### Local Step 6 — Start the Angular Frontend
+
+New terminal:
+
+```bash
+cd frontend/angular-client
+npm install        # only needed on first run
+npm start
+```
+
+Open http://localhost:4200 in your browser.
+
+The dev server proxies all `/api/*` calls to `http://localhost:8080` (the local API Gateway), so no config change is needed.
+
+---
+
+### Service Port Reference (Local)
+
+| Service | Port | Database host:port |
+|---------|----|-------------------|
+| Config Server | 8888 | — |
+| Eureka | 8761 | — |
+| API Gateway | 8080 | — |
+| Auth Service | 8081 | localhost:3306 |
+| User Service | 8082 | localhost:3307 |
+| Account Service | 8083 | localhost:3308 |
+| Transaction Service | 8084 | localhost:3309 |
+| Beneficiary Service | 8085 | localhost:3310 |
+| Notification Service | 8086 | localhost:3311 |
+| Fraud Service | 8087 | localhost:3312 |
+| Audit Service | 8088 | localhost:3313 |
+| Redis | — | localhost:6379 |
+| Kafka | — | localhost:9092 |
+| Angular Frontend | 4200 | — |
+
+---
+
+### Running a Single Service in Debug Mode
+
+#### IntelliJ IDEA
+
+1. Open `banking-platform/backend` as a Maven project.
+2. Navigate to the service's `*Application.java` main class.
+3. Click the **Debug** button (bug icon) next to `main`.
+4. Set breakpoints as needed — IntelliJ will stop execution at them.
+
+#### VS Code
+
+1. Open the `backend` folder in VS Code with the **Extension Pack for Java** installed.
+2. Open the `*Application.java` file for the service you want to debug.
+3. Press `F5` or click **Run → Start Debugging**.
+4. VS Code detects the Spring Boot main class automatically.
+
+#### Command line (debug port 5005)
+
+```bash
+cd backend/services/auth-service
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005"
+```
+
+Then attach your IDE's remote debugger to `localhost:5005`.
+
+---
+
+### Stopping Local Services
+
+```bash
+# Stop each Spring Boot process with Ctrl+C in its terminal
+
+# Stop infrastructure containers (data preserved)
+docker compose stop mysql-auth mysql-user mysql-account mysql-transaction \
+  mysql-beneficiary mysql-notification mysql-fraud mysql-audit \
+  redis zookeeper kafka
+
+# Or stop and remove everything
+docker compose down -v
+```
+
+---
+
+### Local Troubleshooting
+
+**Service fails to connect to MySQL**  
+Confirm the correct container port is exposed. Each service has its own MySQL container on a different host port:
+```bash
+docker compose ps | grep mysql
+```
+
+**`Access denied for user 'root'@'...'`**  
+The container may still be initialising. Wait 10 seconds and retry. If the problem persists:
+```bash
+docker compose restart mysql-auth   # replace with the failing service's db
+```
+
+**Port conflict — another process is using 8081 (or any service port)**  
+```bash
+# Windows
+netstat -ano | findstr :8081
+taskkill /PID <PID> /F
+
+# macOS / Linux
+lsof -ti :8081 | xargs kill -9
+```
+
+**Config Server flapping / services not finding config**  
+The config import is declared `optional:`, so services fall back to their local `application.yml` values if Config Server is unreachable. You can skip starting Config Server entirely during local development — all services will work with their bundled defaults.
+
+**Eureka shows a service with status DOWN**  
+A service registered but its health check is failing. Check the service's terminal output for stack traces. The most common causes are a failed DB migration (Flyway error) or a missing environment variable.
