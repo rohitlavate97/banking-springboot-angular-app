@@ -1,28 +1,29 @@
-package com.nexabank.auth.service;
+package com.banking.auth.service;
 
+import com.banking.auth.security.JwtService;
 import io.jsonwebtoken.Claims;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.*;
 
 class JwtServiceTest {
 
+    // 64-byte hex-encoded test secret (256-bit key encoded as hex = 64 hex chars)
+    private static final String TEST_SECRET =
+        "7465737453656372657400000000000000000000000000000000000000000000" +
+        "0000000000000000000000000000000000000000000000000000000000000000";
+
     private JwtService jwtService;
 
     @BeforeEach
     void setUp() {
-        jwtService = new JwtService();
-        // 512-bit base64 test secret
-        ReflectionTestUtils.setField(jwtService, "secretKey",
-            "dGVzdFNlY3JldEtleUZvclVuaXRUZXN0aW5nT25seU5vdEZvclByb2R1Y3Rpb25Vc2UxMjM0NTY=");
-        ReflectionTestUtils.setField(jwtService, "accessTokenExpiry",  900_000L);
-        ReflectionTestUtils.setField(jwtService, "refreshTokenExpiry", 86_400_000L);
+        jwtService = new JwtService(TEST_SECRET, 900_000L, 86_400_000L);
     }
 
     private UserDetails user(String email) {
@@ -30,9 +31,9 @@ class JwtServiceTest {
     }
 
     @Test
-    void generateToken_AndExtractUsername_ReturnsSameEmail() {
+    void generateAccessToken_AndExtractUsername_ReturnsSameEmail() {
         UserDetails details = user("alice@test.com");
-        String token = jwtService.generateToken(details);
+        String token = jwtService.generateAccessToken(details, Map.of());
 
         assertThat(jwtService.extractUsername(token)).isEqualTo("alice@test.com");
     }
@@ -40,31 +41,33 @@ class JwtServiceTest {
     @Test
     void isTokenValid_WithValidToken_ReturnsTrue() {
         UserDetails details = user("alice@test.com");
-        String token = jwtService.generateToken(details);
+        String token = jwtService.generateAccessToken(details, Map.of());
 
         assertThat(jwtService.isTokenValid(token, details)).isTrue();
     }
 
     @Test
     void isTokenValid_WrongUser_ReturnsFalse() {
-        String token = jwtService.generateToken(user("alice@test.com"));
+        String token = jwtService.generateAccessToken(user("alice@test.com"), Map.of());
         assertThat(jwtService.isTokenValid(token, user("bob@test.com"))).isFalse();
     }
 
     @Test
-    void generateToken_ContainsExpectedClaims() {
+    void generateAccessToken_ContainsExpectedClaims() {
         UserDetails details = user("alice@test.com");
-        String token = jwtService.generateToken(details);
-        Claims claims = jwtService.extractAllClaims(token);
+        String token = jwtService.generateAccessToken(details, Map.of());
 
-        assertThat(claims.getSubject()).isEqualTo("alice@test.com");
-        assertThat(claims.getExpiration()).isAfter(new java.util.Date());
+        String subject = jwtService.extractClaim(token, Claims::getSubject);
+        java.util.Date expiration = jwtService.extractClaim(token, Claims::getExpiration);
+
+        assertThat(subject).isEqualTo("alice@test.com");
+        assertThat(expiration).isAfter(new java.util.Date());
     }
 
     @Test
     void refreshToken_IsDifferentFromAccessToken() {
         UserDetails details = user("alice@test.com");
-        String access  = jwtService.generateToken(details);
+        String access  = jwtService.generateAccessToken(details, Map.of());
         String refresh = jwtService.generateRefreshToken(details);
 
         assertThat(access).isNotEqualTo(refresh);

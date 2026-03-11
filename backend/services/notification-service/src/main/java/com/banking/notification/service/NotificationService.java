@@ -57,14 +57,13 @@ public class NotificationService {
     private void sendAndSave(String userId, String recipientEmail, String subject,
                               String body, NotificationType type, String eventType, String referenceId) {
         Notification notification = new Notification();
-        notification.setUserId(userId);
-        notification.setRecipientEmail(recipientEmail);
+        notification.setUserId(UUID.fromString(userId));
+        notification.setRecipient(recipientEmail);
         notification.setSubject(subject);
-        notification.setBody(body);
+        notification.setMessage(body);
         notification.setType(type);
         notification.setStatus(NotificationStatus.PENDING);
         notification.setReferenceId(referenceId);
-        notification.setEventType(eventType);
         notification = notificationRepository.save(notification);
 
         try {
@@ -74,10 +73,11 @@ public class NotificationService {
             message.setText(body);
             mailSender.send(message);
             notification.setStatus(NotificationStatus.SENT);
+            notification.setSentAt(java.time.LocalDateTime.now());
             log.info("Email sent to [{}] for event [{}] ref [{}]", recipientEmail, eventType, referenceId);
         } catch (Exception ex) {
             notification.setStatus(NotificationStatus.FAILED);
-            notification.setFailureReason(ex.getMessage());
+            notification.setErrorMessage(ex.getMessage());
             log.error("Failed to send email to [{}] for event [{}]: {}", recipientEmail, eventType, ex.getMessage(), ex);
         } finally {
             notificationRepository.save(notification);

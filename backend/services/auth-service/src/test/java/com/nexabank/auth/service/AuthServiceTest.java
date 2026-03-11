@@ -1,21 +1,30 @@
-package com.nexabank.auth.service;
+package com.banking.auth.service;
 
-import com.nexabank.auth.dto.LoginRequest;
-import com.nexabank.auth.dto.RegisterRequest;
-import com.nexabank.auth.entity.Role;
-import com.nexabank.auth.entity.User;
-import com.nexabank.auth.exception.AuthException;
-import com.nexabank.auth.repository.RefreshTokenRepository;
-import com.nexabank.auth.repository.UserRepository;
+import com.banking.auth.dto.LoginRequest;
+import com.banking.auth.dto.RegisterRequest;
+import com.banking.auth.entity.RefreshToken;
+import com.banking.auth.entity.Role;
+import com.banking.auth.entity.User;
+import com.banking.auth.exception.AuthException;
+import com.banking.auth.repository.RefreshTokenRepository;
+import com.banking.auth.repository.UserRepository;
+import com.banking.auth.security.JwtService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -28,6 +37,7 @@ class AuthServiceTest {
     @Mock RefreshTokenRepository refreshTokenRepository;
     @Mock PasswordEncoder passwordEncoder;
     @Mock JwtService jwtService;
+    @Mock AuthenticationManager authenticationManager;
 
     @InjectMocks AuthService authService;
 
@@ -35,12 +45,16 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
+        ReflectionTestUtils.setField(authService, "accessTokenExpiration", 900_000L);
+        ReflectionTestUtils.setField(authService, "refreshTokenExpiration", 86_400_000L);
+
         testUser = new User();
-        testUser.setId(1L);
+        testUser.setId(UUID.randomUUID());
         testUser.setEmail("user@test.com");
         testUser.setPassword("hashed_password");
-        testUser.setRole(Role.USER);
+        testUser.setRole(Role.CUSTOMER);
         testUser.setEnabled(true);
+        testUser.setAccountNonLocked(true);
         testUser.setFailedLoginAttempts(0);
     }
 
@@ -49,18 +63,17 @@ class AuthServiceTest {
         RegisterRequest request = new RegisterRequest();
         request.setEmail("new@test.com");
         request.setPassword("Password@1");
-        request.setFirstName("John");
-        request.setLastName("Doe");
 
         when(userRepository.existsByEmail("new@test.com")).thenReturn(false);
         when(passwordEncoder.encode("Password@1")).thenReturn("hashed");
         when(userRepository.save(any(User.class))).thenAnswer(inv -> {
             User u = inv.getArgument(0);
-            u.setId(2L);
+            u.setId(UUID.randomUUID());
             return u;
         });
-        when(jwtService.generateToken(any())).thenReturn("access_token");
+        when(jwtService.generateAccessToken(any(), any(Map.class))).thenReturn("access_token");
         when(jwtService.generateRefreshToken(any())).thenReturn("refresh_token");
+        when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var response = authService.register(request);
 
@@ -87,14 +100,16 @@ class AuthServiceTest {
         request.setPassword("correct_password");
 
         when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches("correct_password", "hashed_password")).thenReturn(true);
-        when(jwtService.generateToken(any())).thenReturn("access_token");
+        when(authenticationManager.authenticate(any())).thenReturn(
+            new UsernamePasswordAuthenticationToken("user@test.com", "correct_password")
+        );
+        when(jwtService.generateAccessToken(any(), any(Map.class))).thenReturn("access_token");
         when(jwtService.generateRefreshToken(any())).thenReturn("refresh_token");
+        when(refreshTokenRepository.save(any(RefreshToken.class))).thenAnswer(inv -> inv.getArgument(0));
 
         var response = authService.login(request);
 
         assertThat(response.getAccessToken()).isNotNull();
-        verify(userRepository).save(testUser); // reset failed attempts
     }
 
     @Test
@@ -104,7 +119,7 @@ class AuthServiceTest {
         request.setPassword("wrong_password");
 
         when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(testUser));
-        when(passwordEncoder.matches("wrong_password", "hashed_password")).thenReturn(false);
+        when(authenticationManager.authenticate(any())).thenThrow(new BadCredentialsException("Bad credentials"));
 
         assertThatThrownBy(() -> authService.login(request))
             .isInstanceOf(AuthException.class);
@@ -125,7 +140,7 @@ class AuthServiceTest {
         when(userRepository.findByEmail("user@test.com")).thenReturn(Optional.of(testUser));
 
         assertThatThrownBy(() -> authService.login(request))
-            .isInstanceOf(AuthException.class)
+            .isInstanceOf(LockedException.class)
             .hasMessageContaining("locked");
     }
 

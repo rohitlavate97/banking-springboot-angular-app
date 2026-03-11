@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Slf4j
 @Component
@@ -80,13 +81,16 @@ public class AuditEventConsumer {
                               String entityType, String entityId, Acknowledgment acknowledgment) {
         try {
             String eventData = objectMapper.writeValueAsString(event);
-            AuditLog log = new AuditLog();
-            log.setUserId(getStr(event, "userId"));
-            log.setEventType(eventType);
-            log.setEntityType(entityType);
-            log.setEntityId(entityId);
-            log.setEventData(eventData);
-            log.setCorrelationId(getStr(event, "correlationId"));
+            String userIdStr = getStr(event, "userId");
+            UUID userId = userIdStr != null ? UUID.fromString(userIdStr) : null;
+            AuditLog log = AuditLog.builder()
+                    .userId(userId)
+                    .eventType(eventType)
+                    .entityType(entityType)
+                    .entityId(entityId)
+                    .eventData(eventData)
+                    .correlationId(getStr(event, "correlationId"))
+                    .build();
             auditLogRepository.save(log);
             acknowledgment.acknowledge();
         } catch (Exception ex) {

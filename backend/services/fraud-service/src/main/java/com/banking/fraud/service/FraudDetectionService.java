@@ -72,12 +72,12 @@ public class FraudDetectionService {
         FraudAlert alert = new FraudAlert();
         alert.setUserId(UUID.fromString(event.getUserId()));
         alert.setTransactionReference(event.getTransactionReference());
-        alert.setRuleType(ruleType);
+        alert.setRuleTriggered(ruleType);
         alert.setStatus(FraudAlertStatus.OPEN);
         alert.setDescription(buildDescription(ruleType, event));
-        alert.setAmount(event.getAmount());
-        alert.setSourceAccountNumber(event.getSourceAccountNumber());
-        alert.setDestinationAccountNumber(event.getDestinationAccountNumber());
+        alert.setTransactionAmount(event.getAmount());
+        alert.setAccountNumber(event.getSourceAccountNumber() != null
+                ? event.getSourceAccountNumber() : event.getDestinationAccountNumber());
         alert = fraudAlertRepository.save(alert);
 
         FraudAlertRaisedEvent alertEvent = FraudAlertRaisedEvent.builder()

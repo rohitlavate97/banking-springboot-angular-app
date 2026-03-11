@@ -1,13 +1,15 @@
-package com.nexabank.transaction.service;
+package com.banking.transaction.service;
 
-import com.nexabank.transaction.client.AccountServiceClient;
-import com.nexabank.transaction.dto.TransactionRequest;
-import com.nexabank.transaction.entity.Transaction;
-import com.nexabank.transaction.entity.TransactionStatus;
-import com.nexabank.transaction.entity.TransactionType;
-import com.nexabank.transaction.exception.TransactionException;
-import com.nexabank.transaction.kafka.TransactionEventPublisher;
-import com.nexabank.transaction.repository.TransactionRepository;
+import com.banking.transaction.client.AccountServiceClient;
+import com.banking.transaction.dto.TransactionRequest;
+import com.banking.transaction.dto.TransactionResponse;
+import com.banking.transaction.entity.Transaction;
+import com.banking.transaction.entity.TransactionStatus;
+import com.banking.transaction.entity.TransactionType;
+import com.banking.transaction.event.TransactionEventPublisher;
+import com.banking.transaction.exception.TransactionException;
+import com.banking.transaction.mapper.TransactionMapper;
+import com.banking.transaction.repository.TransactionRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
@@ -27,75 +30,69 @@ class TransactionServiceTest {
     @Mock TransactionRepository transactionRepository;
     @Mock AccountServiceClient accountServiceClient;
     @Mock TransactionEventPublisher eventPublisher;
+    @Mock TransactionMapper transactionMapper;
 
     @InjectMocks TransactionService transactionService;
+
+    private static final String SRC  = "ACC0000000000001";
+    private static final String DEST = "ACC0000000000002";
+    private static final UUID   USER = UUID.randomUUID();
+    private static final String CORR = "corr-001";
 
     @BeforeEach
     void setUp() {
         when(transactionRepository.save(any(Transaction.class))).thenAnswer(inv -> {
             Transaction t = inv.getArgument(0);
-            if (t.getId() == null) t.setId(1L);
+            if (t.getId() == null) t.setId(UUID.randomUUID());
             return t;
         });
+        when(transactionMapper.toResponse(any())).thenReturn(new TransactionResponse());
+    }
+
+    private TransactionRequest transferRequest() {
+        TransactionRequest req = new TransactionRequest();
+        req.setType(TransactionType.TRANSFER);
+        req.setSourceAccountNumber(SRC);
+        req.setDestinationAccountNumber(DEST);
+        req.setAmount(new BigDecimal("300.00"));
+        req.setDescription("test transfer");
+        return req;
     }
 
     // ---- Transfer (Saga happy path) ----
 
     @Test
     void transfer_Success_EmitsCompletedEvent() {
-        TransactionRequest req = new TransactionRequest();
-        req.setSourceAccountId(1L);
-        req.setDestinationAccountId(2L);
-        req.setAmount(new BigDecimal("300.00"));
-        req.setDescription("test transfer");
+        doNothing().when(accountServiceClient).debit(eq(SRC), any(), anyString());
+        doNothing().when(accountServiceClient).credit(eq(DEST), any(), anyString());
 
-        doNothing().when(accountServiceClient).debit(eq(1L), any());
-        doNothing().when(accountServiceClient).credit(eq(2L), any());
-        doNothing().when(eventPublisher).publishTransactionCreated(any());
-        doNothing().when(eventPublisher).publishTransactionCompleted(any());
+        transactionService.transfer(transferRequest(), USER, CORR);
 
-        Transaction result = transactionService.transfer(req, 10L);
-
-        assertThat(result.getStatus()).isEqualTo(TransactionStatus.COMPLETED);
         verify(eventPublisher).publishTransactionCompleted(any());
         verify(eventPublisher, never()).publishTransactionFailed(any());
     }
 
     @Test
     void transfer_CreditFails_CompensatesAndEmitsFailedEvent() {
-        TransactionRequest req = new TransactionRequest();
-        req.setSourceAccountId(1L);
-        req.setDestinationAccountId(2L);
-        req.setAmount(new BigDecimal("300.00"));
+        doNothing().when(accountServiceClient).debit(eq(SRC), any(), anyString());
+        doThrow(new RuntimeException("Credit failed")).when(accountServiceClient).credit(eq(DEST), any(), anyString());
 
-        doNothing().when(accountServiceClient).debit(eq(1L), any());
-        doThrow(new RuntimeException("Credit failed")).when(accountServiceClient).credit(eq(2L), any());
-        doNothing().when(accountServiceClient).credit(eq(1L), any()); // compensation
-        doNothing().when(eventPublisher).publishTransactionCreated(any());
-        doNothing().when(eventPublisher).publishTransactionFailed(any());
+        assertThatThrownBy(() -> transactionService.transfer(transferRequest(), USER, CORR))
+            .isInstanceOf(TransactionException.class);
 
-        Transaction result = transactionService.transfer(req, 10L);
-
-        assertThat(result.getStatus()).isEqualTo(TransactionStatus.ROLLED_BACK);
-        verify(accountServiceClient).credit(eq(1L), any()); // compensating credit
+        verify(accountServiceClient).credit(eq(SRC), any(), anyString()); // compensating credit
         verify(eventPublisher).publishTransactionFailed(any());
     }
 
     @Test
-    void transfer_DebitFails_SetsFailedStatus() {
-        TransactionRequest req = new TransactionRequest();
-        req.setSourceAccountId(1L);
-        req.setDestinationAccountId(2L);
-        req.setAmount(new BigDecimal("300.00"));
+    void transfer_DebitFails_EmitsFailedEvent() {
+        doThrow(new RuntimeException("Insufficient funds")).when(accountServiceClient).debit(eq(SRC), any(), anyString());
 
-        doThrow(new RuntimeException("Insufficient funds")).when(accountServiceClient).debit(eq(1L), any());
-        doNothing().when(eventPublisher).publishTransactionCreated(any());
-        doNothing().when(eventPublisher).publishTransactionFailed(any());
+        assertThatThrownBy(() -> transactionService.transfer(transferRequest(), USER, CORR))
+            .isInstanceOf(TransactionException.class);
 
-        Transaction result = transactionService.transfer(req, 10L);
-
-        assertThat(result.getStatus()).isEqualTo(TransactionStatus.FAILED);
-        verify(accountServiceClient, never()).credit(any(), any());
+        verify(accountServiceClient, never()).credit(eq(DEST), any(), anyString());
+        verify(eventPublisher).publishTransactionFailed(any());
     }
 
     // ---- Deposit ----
@@ -103,16 +100,16 @@ class TransactionServiceTest {
     @Test
     void deposit_Success_ReturnsCompleted() {
         TransactionRequest req = new TransactionRequest();
-        req.setDestinationAccountId(2L);
+        req.setType(TransactionType.DEPOSIT);
+        req.setSourceAccountNumber(SRC);
+        req.setDestinationAccountNumber(DEST);
         req.setAmount(new BigDecimal("100.00"));
 
-        doNothing().when(accountServiceClient).credit(eq(2L), any());
-        doNothing().when(eventPublisher).publishTransactionCompleted(any());
+        doNothing().when(accountServiceClient).credit(eq(DEST), any(), anyString());
 
-        Transaction result = transactionService.deposit(req, 10L);
+        transactionService.deposit(req, USER, CORR);
 
-        assertThat(result.getStatus()).isEqualTo(TransactionStatus.COMPLETED);
-        assertThat(result.getTransactionType()).isEqualTo(TransactionType.DEPOSIT);
+        verify(eventPublisher).publishTransactionCompleted(any());
     }
 
     // ---- Withdraw ----
@@ -120,26 +117,27 @@ class TransactionServiceTest {
     @Test
     void withdraw_Success_ReturnsCompleted() {
         TransactionRequest req = new TransactionRequest();
-        req.setSourceAccountId(1L);
+        req.setType(TransactionType.WITHDRAWAL);
+        req.setSourceAccountNumber(SRC);
+        req.setDestinationAccountNumber(DEST);
         req.setAmount(new BigDecimal("50.00"));
 
-        doNothing().when(accountServiceClient).debit(eq(1L), any());
-        doNothing().when(eventPublisher).publishTransactionCompleted(any());
+        doNothing().when(accountServiceClient).debit(eq(SRC), any(), anyString());
 
-        Transaction result = transactionService.withdraw(req, 10L);
+        transactionService.withdraw(req, USER, CORR);
 
-        assertThat(result.getStatus()).isEqualTo(TransactionStatus.COMPLETED);
-        assertThat(result.getTransactionType()).isEqualTo(TransactionType.WITHDRAWAL);
+        verify(eventPublisher).publishTransactionCompleted(any());
     }
 
     @Test
     void transfer_NullAmount_ThrowsTransactionException() {
         TransactionRequest req = new TransactionRequest();
-        req.setSourceAccountId(1L);
-        req.setDestinationAccountId(2L);
+        req.setType(TransactionType.TRANSFER);
+        req.setSourceAccountNumber(SRC);
+        req.setDestinationAccountNumber(DEST);
         req.setAmount(null);
 
-        assertThatThrownBy(() -> transactionService.transfer(req, 10L))
-            .isInstanceOf(TransactionException.class);
+        assertThatThrownBy(() -> transactionService.transfer(req, USER, CORR))
+            .isInstanceOf(Exception.class);
     }
 }

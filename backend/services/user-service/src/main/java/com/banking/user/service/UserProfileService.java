@@ -41,6 +41,23 @@ public class UserProfileService {
     }
 
     @Transactional(readOnly = true)
+    public UserProfileResponse getProfileByEmail(String email) {
+        UserProfile profile = userProfileRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Profile not found for email: " + email));
+        return userProfileMapper.toResponse(profile);
+    }
+
+    @Transactional
+    public UserProfileResponse updateProfileByEmail(String email, UpdateProfileRequest request) {
+        UserProfile profile = userProfileRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException("Profile not found for email: " + email));
+        userProfileMapper.updateFromRequest(request, profile);
+        UserProfile updated = userProfileRepository.save(profile);
+        log.info("Updated profile for email: {}", email);
+        return userProfileMapper.toResponse(updated);
+    }
+
+    @Transactional(readOnly = true)
     public UserProfileResponse getProfileByAuthUserId(UUID authUserId) {
         UserProfile profile = userProfileRepository.findByAuthUserId(authUserId)
                 .orElseThrow(() -> new UserNotFoundException("Profile not found for user: " + authUserId));
