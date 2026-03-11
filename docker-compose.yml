@@ -36,9 +36,7 @@ services:
     container_name: mysql-auth
     environment:
       MYSQL_DATABASE: auth_db
-      MYSQL_USER: auth_user
-      MYSQL_PASSWORD: ${MYSQL_AUTH_PASSWORD:-auth_secret_123}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
+      MYSQL_ROOT_PASSWORD: Admin@123
     volumes:
       - mysql-auth-data:/var/lib/mysql
     ports:
@@ -55,9 +53,7 @@ services:
     container_name: mysql-user
     environment:
       MYSQL_DATABASE: user_db
-      MYSQL_USER: user_svc
-      MYSQL_PASSWORD: ${MYSQL_USER_PASSWORD:-user_secret_123}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
+      MYSQL_ROOT_PASSWORD: Admin@123
     volumes:
       - mysql-user-data:/var/lib/mysql
     ports:
@@ -74,9 +70,7 @@ services:
     container_name: mysql-account
     environment:
       MYSQL_DATABASE: account_db
-      MYSQL_USER: account_svc
-      MYSQL_PASSWORD: ${MYSQL_ACCOUNT_PASSWORD:-account_secret_123}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
+      MYSQL_ROOT_PASSWORD: Admin@123
     volumes:
       - mysql-account-data:/var/lib/mysql
     ports:
@@ -93,9 +87,7 @@ services:
     container_name: mysql-transaction
     environment:
       MYSQL_DATABASE: transaction_db
-      MYSQL_USER: transaction_svc
-      MYSQL_PASSWORD: ${MYSQL_TRANSACTION_PASSWORD:-txn_secret_123}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
+      MYSQL_ROOT_PASSWORD: Admin@123
     volumes:
       - mysql-transaction-data:/var/lib/mysql
     ports:
@@ -112,9 +104,7 @@ services:
     container_name: mysql-beneficiary
     environment:
       MYSQL_DATABASE: beneficiary_db
-      MYSQL_USER: beneficiary_svc
-      MYSQL_PASSWORD: ${MYSQL_BENEFICIARY_PASSWORD:-ben_secret_123}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
+      MYSQL_ROOT_PASSWORD: Admin@123
     volumes:
       - mysql-beneficiary-data:/var/lib/mysql
     ports:
@@ -131,9 +121,7 @@ services:
     container_name: mysql-notification
     environment:
       MYSQL_DATABASE: notification_db
-      MYSQL_USER: notification_svc
-      MYSQL_PASSWORD: ${MYSQL_NOTIFICATION_PASSWORD:-notif_secret_123}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
+      MYSQL_ROOT_PASSWORD: Admin@123
     volumes:
       - mysql-notification-data:/var/lib/mysql
     ports:
@@ -150,9 +138,7 @@ services:
     container_name: mysql-fraud
     environment:
       MYSQL_DATABASE: fraud_db
-      MYSQL_USER: fraud_svc
-      MYSQL_PASSWORD: ${MYSQL_FRAUD_PASSWORD:-fraud_secret_123}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
+      MYSQL_ROOT_PASSWORD: Admin@123
     volumes:
       - mysql-fraud-data:/var/lib/mysql
     ports:
@@ -169,9 +155,7 @@ services:
     container_name: mysql-audit
     environment:
       MYSQL_DATABASE: audit_db
-      MYSQL_USER: audit_svc
-      MYSQL_PASSWORD: ${MYSQL_AUDIT_PASSWORD:-audit_secret_123}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
+      MYSQL_ROOT_PASSWORD: Admin@123
     volumes:
       - mysql-audit-data:/var/lib/mysql
     ports:
@@ -327,8 +311,8 @@ services:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-auth:3306/auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: auth_user
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_AUTH_PASSWORD:-auth_secret_123}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Admin@123
       JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
     ports:
       - "8081:8081"
@@ -346,8 +330,8 @@ services:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-user:3306/user_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: user_svc
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_USER_PASSWORD:-user_secret_123}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Admin@123
     ports:
       - "8082:8082"
 
@@ -366,8 +350,8 @@ services:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-account:3306/account_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: account_svc
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ACCOUNT_PASSWORD:-account_secret_123}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Admin@123
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secret_123}
     ports:
@@ -388,8 +372,8 @@ services:
         condition: service_started
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-transaction:3306/transaction_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: transaction_svc
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_TRANSACTION_PASSWORD:-txn_secret_123}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Admin@123
       SERVICES_ACCOUNT_SERVICE_URL: "http://account-service:8083"
     ports:
       - "8084:8084"
@@ -407,8 +391,8 @@ services:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-beneficiary:3306/beneficiary_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: beneficiary_svc
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_BENEFICIARY_PASSWORD:-ben_secret_123}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Admin@123
     ports:
       - "8085:8085"
 
@@ -425,8 +409,8 @@ services:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-notification:3306/notification_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: notification_svc
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_NOTIFICATION_PASSWORD:-notif_secret_123}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Admin@123
       SPRING_MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
       SPRING_MAIL_PORT: ${MAIL_PORT:-587}
       SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-noreply@banking.com}
@@ -447,8 +431,8 @@ services:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-fraud:3306/fraud_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: fraud_svc
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_FRAUD_PASSWORD:-fraud_secret_123}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Admin@123
     ports:
       - "8087:8087"
 
@@ -465,8 +449,8 @@ services:
         condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-audit:3306/audit_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
-      SPRING_DATASOURCE_USERNAME: audit_svc
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_AUDIT_PASSWORD:-audit_secret_123}
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: Admin@123
     ports:
       - "8088:8088"
 

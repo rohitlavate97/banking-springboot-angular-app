@@ -8,8 +8,8 @@ spring:
     import: optional:configserver:${CONFIG_SERVER_URL:http://configuser:configpassword@localhost:8888}
   datasource:
     url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:transaction_db}?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: ${DB_USER:transaction_svc}
-    password: ${DB_PASSWORD:txn_secret_123}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:Admin@123}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
       maximum-pool-size: 20

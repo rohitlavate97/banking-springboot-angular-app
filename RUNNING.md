@@ -40,18 +40,10 @@ copy .env.example .env
 cp .env.example .env
 ```
 
-Open `.env` in any text editor and **change all the default passwords** to values you choose. The key variables are:
+Open `.env` in any text editor and set your passwords. The key variables are:
 
 ```
-MYSQL_ROOT_PASSWORD=change_me
-MYSQL_AUTH_PASSWORD=change_me
-MYSQL_USER_PASSWORD=change_me
-MYSQL_ACCOUNT_PASSWORD=change_me
-MYSQL_TRANSACTION_PASSWORD=change_me
-MYSQL_BENEFICIARY_PASSWORD=change_me
-MYSQL_NOTIFICATION_PASSWORD=change_me
-MYSQL_FRAUD_PASSWORD=change_me
-MYSQL_AUDIT_PASSWORD=change_me
+MYSQL_ROOT_PASSWORD=Admin@123
 JWT_SECRET=your_256_bit_secret_here
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
