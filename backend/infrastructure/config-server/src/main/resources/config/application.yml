@@ -1,0 +1,17 @@
+# Default shared config for all services (local dev)
+# Override per-service in {application-name}.yml
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
+
+logging:
+  level:
+    root: INFO
+    com.banking: DEBUG
+
