@@ -17,7 +17,7 @@ export class BeneficiaryListComponent implements OnInit {
   adding = false;
   addError = '';
   addSuccess = '';
-  deletingId: number | null = null;
+  deletingId: string | null = null;
 
   constructor(private beneficiaryService: BeneficiaryService, private fb: FormBuilder) {
     this.addForm = this.fb.group({
@@ -67,7 +67,7 @@ export class BeneficiaryListComponent implements OnInit {
     });
   }
 
-  onDelete(id: number, nickname: string): void {
+  onDelete(id: string, nickname: string): void {
     if (!confirm(`Remove beneficiary "${nickname}"?`)) return;
     this.deletingId = id;
 

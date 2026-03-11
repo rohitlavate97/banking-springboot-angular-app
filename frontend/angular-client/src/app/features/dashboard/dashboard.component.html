@@ -88,7 +88,7 @@
         <div class="txn-list" *ngIf="recentTransactions.length > 0">
           <div class="txn-item" *ngFor="let tx of recentTransactions">
             <div class="txn-meta">
-              <div class="txn-type">{{ tx.transactionType }}</div>
+              <div class="txn-type">{{ tx.type }}</div>
               <div class="txn-date text-muted text-xs">{{ tx.createdAt | date:'MMM d, h:mm a' }}</div>
             </div>
             <div class="txn-right">

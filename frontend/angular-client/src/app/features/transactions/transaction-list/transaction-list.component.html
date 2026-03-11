@@ -29,8 +29,8 @@
           <tbody>
             <tr *ngFor="let tx of transactions">
               <td>
-                <span class="tx-type-badge" [ngClass]="tx.transactionType.toLowerCase()">
-                  {{ tx.transactionType }}
+                <span class="tx-type-badge" [ngClass]="tx.type.toLowerCase()">
+                  {{ tx.type }}
                 </span>
               </td>
               <td>
@@ -38,8 +38,8 @@
                   {{ isCredit(tx) ? '+' : '-' }}{{ formatCurrency(tx.amount) }}
                 </span>
               </td>
-              <td class="font-mono text-sm text-muted">{{ tx.sourceAccountId || '—' }}</td>
-              <td class="font-mono text-sm text-muted">{{ tx.destinationAccountId || '—' }}</td>
+              <td class="font-mono text-sm text-muted">{{ tx.sourceAccountNumber || '—' }}</td>
+              <td class="font-mono text-sm text-muted">{{ tx.destinationAccountNumber || '—' }}</td>
               <td><span class="badge" [ngClass]="getStatusClass(tx.status)">{{ tx.status }}</span></td>
               <td class="text-muted text-sm">{{ tx.createdAt | date:'MMM d, y, h:mm a' }}</td>
             </tr>

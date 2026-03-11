@@ -75,6 +75,6 @@ export class TransactionListComponent implements OnInit {
   }
 
   isCredit(tx: Transaction): boolean {
-    return tx.transactionType === 'DEPOSIT';
+    return tx.type === 'DEPOSIT';
   }
 }

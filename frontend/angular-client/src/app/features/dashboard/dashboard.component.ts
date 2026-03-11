@@ -60,6 +60,6 @@ export class DashboardComponent implements OnInit {
   }
 
   isCredit(tx: Transaction): boolean {
-    return ['DEPOSIT'].includes(tx.transactionType);
+    return ['DEPOSIT'].includes(tx.type);
   }
 }
