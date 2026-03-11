@@ -30,146 +30,154 @@ services:
   # INFRASTRUCTURE: Databases
   # ============================================================
 
-  postgres-auth:
+  mysql-auth:
     <<: *service-defaults
-    image: postgres:16-alpine
-    container_name: postgres-auth
+    image: mysql:8.0
+    container_name: mysql-auth
     environment:
-      POSTGRES_DB: auth_db
-      POSTGRES_USER: auth_user
-      POSTGRES_PASSWORD: ${POSTGRES_AUTH_PASSWORD:-auth_secret_123}
+      MYSQL_DATABASE: auth_db
+      MYSQL_USER: auth_user
+      MYSQL_PASSWORD: ${MYSQL_AUTH_PASSWORD:-auth_secret_123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
     volumes:
-      - postgres-auth-data:/var/lib/postgresql/data
+      - mysql-auth-data:/var/lib/mysql
     ports:
-      - "5432:5432"
+      - "3306:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U auth_user -d auth_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  postgres-user:
+  mysql-user:
     <<: *service-defaults
-    image: postgres:16-alpine
-    container_name: postgres-user
+    image: mysql:8.0
+    container_name: mysql-user
     environment:
-      POSTGRES_DB: user_db
-      POSTGRES_USER: user_svc
-      POSTGRES_PASSWORD: ${POSTGRES_USER_PASSWORD:-user_secret_123}
+      MYSQL_DATABASE: user_db
+      MYSQL_USER: user_svc
+      MYSQL_PASSWORD: ${MYSQL_USER_PASSWORD:-user_secret_123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
     volumes:
-      - postgres-user-data:/var/lib/postgresql/data
+      - mysql-user-data:/var/lib/mysql
     ports:
-      - "5433:5432"
+      - "3307:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U user_svc -d user_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  postgres-account:
+  mysql-account:
     <<: *service-defaults
-    image: postgres:16-alpine
-    container_name: postgres-account
+    image: mysql:8.0
+    container_name: mysql-account
     environment:
-      POSTGRES_DB: account_db
-      POSTGRES_USER: account_svc
-      POSTGRES_PASSWORD: ${POSTGRES_ACCOUNT_PASSWORD:-account_secret_123}
+      MYSQL_DATABASE: account_db
+      MYSQL_USER: account_svc
+      MYSQL_PASSWORD: ${MYSQL_ACCOUNT_PASSWORD:-account_secret_123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
     volumes:
-      - postgres-account-data:/var/lib/postgresql/data
+      - mysql-account-data:/var/lib/mysql
     ports:
-      - "5434:5432"
+      - "3308:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U account_svc -d account_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  postgres-transaction:
+  mysql-transaction:
     <<: *service-defaults
-    image: postgres:16-alpine
-    container_name: postgres-transaction
+    image: mysql:8.0
+    container_name: mysql-transaction
     environment:
-      POSTGRES_DB: transaction_db
-      POSTGRES_USER: transaction_svc
-      POSTGRES_PASSWORD: ${POSTGRES_TRANSACTION_PASSWORD:-txn_secret_123}
+      MYSQL_DATABASE: transaction_db
+      MYSQL_USER: transaction_svc
+      MYSQL_PASSWORD: ${MYSQL_TRANSACTION_PASSWORD:-txn_secret_123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
     volumes:
-      - postgres-transaction-data:/var/lib/postgresql/data
+      - mysql-transaction-data:/var/lib/mysql
     ports:
-      - "5435:5432"
+      - "3309:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U transaction_svc -d transaction_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  postgres-beneficiary:
+  mysql-beneficiary:
     <<: *service-defaults
-    image: postgres:16-alpine
-    container_name: postgres-beneficiary
+    image: mysql:8.0
+    container_name: mysql-beneficiary
     environment:
-      POSTGRES_DB: beneficiary_db
-      POSTGRES_USER: beneficiary_svc
-      POSTGRES_PASSWORD: ${POSTGRES_BENEFICIARY_PASSWORD:-ben_secret_123}
+      MYSQL_DATABASE: beneficiary_db
+      MYSQL_USER: beneficiary_svc
+      MYSQL_PASSWORD: ${MYSQL_BENEFICIARY_PASSWORD:-ben_secret_123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
     volumes:
-      - postgres-beneficiary-data:/var/lib/postgresql/data
+      - mysql-beneficiary-data:/var/lib/mysql
     ports:
-      - "5436:5432"
+      - "3310:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U beneficiary_svc -d beneficiary_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  postgres-notification:
+  mysql-notification:
     <<: *service-defaults
-    image: postgres:16-alpine
-    container_name: postgres-notification
+    image: mysql:8.0
+    container_name: mysql-notification
     environment:
-      POSTGRES_DB: notification_db
-      POSTGRES_USER: notification_svc
-      POSTGRES_PASSWORD: ${POSTGRES_NOTIFICATION_PASSWORD:-notif_secret_123}
+      MYSQL_DATABASE: notification_db
+      MYSQL_USER: notification_svc
+      MYSQL_PASSWORD: ${MYSQL_NOTIFICATION_PASSWORD:-notif_secret_123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
     volumes:
-      - postgres-notification-data:/var/lib/postgresql/data
+      - mysql-notification-data:/var/lib/mysql
     ports:
-      - "5437:5432"
+      - "3311:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U notification_svc -d notification_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  postgres-fraud:
+  mysql-fraud:
     <<: *service-defaults
-    image: postgres:16-alpine
-    container_name: postgres-fraud
+    image: mysql:8.0
+    container_name: mysql-fraud
     environment:
-      POSTGRES_DB: fraud_db
-      POSTGRES_USER: fraud_svc
-      POSTGRES_PASSWORD: ${POSTGRES_FRAUD_PASSWORD:-fraud_secret_123}
+      MYSQL_DATABASE: fraud_db
+      MYSQL_USER: fraud_svc
+      MYSQL_PASSWORD: ${MYSQL_FRAUD_PASSWORD:-fraud_secret_123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
     volumes:
-      - postgres-fraud-data:/var/lib/postgresql/data
+      - mysql-fraud-data:/var/lib/mysql
     ports:
-      - "5438:5432"
+      - "3312:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U fraud_svc -d fraud_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  postgres-audit:
+  mysql-audit:
     <<: *service-defaults
-    image: postgres:16-alpine
-    container_name: postgres-audit
+    image: mysql:8.0
+    container_name: mysql-audit
     environment:
-      POSTGRES_DB: audit_db
-      POSTGRES_USER: audit_svc
-      POSTGRES_PASSWORD: ${POSTGRES_AUDIT_PASSWORD:-audit_secret_123}
+      MYSQL_DATABASE: audit_db
+      MYSQL_USER: audit_svc
+      MYSQL_PASSWORD: ${MYSQL_AUDIT_PASSWORD:-audit_secret_123}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_secret_123}
     volumes:
-      - postgres-audit-data:/var/lib/postgresql/data
+      - mysql-audit-data:/var/lib/mysql
     ports:
-      - "5439:5432"
+      - "3313:3306"
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U audit_svc -d audit_db"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -313,14 +321,14 @@ services:
       dockerfile: backend/services/auth-service/Dockerfile
     container_name: auth-service
     depends_on:
-      postgres-auth:
+      mysql-auth:
         condition: service_healthy
       service-discovery:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-auth:5432/auth_db"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-auth:3306/auth_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: auth_user
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_AUTH_PASSWORD:-auth_secret_123}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_AUTH_PASSWORD:-auth_secret_123}
       JWT_SECRET: ${JWT_SECRET:-404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
     ports:
       - "8081:8081"
@@ -332,14 +340,14 @@ services:
       dockerfile: backend/services/user-service/Dockerfile
     container_name: user-service
     depends_on:
-      postgres-user:
+      mysql-user:
         condition: service_healthy
       service-discovery:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-user:5432/user_db"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-user:3306/user_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: user_svc
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_USER_PASSWORD:-user_secret_123}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_USER_PASSWORD:-user_secret_123}
     ports:
       - "8082:8082"
 
@@ -350,16 +358,16 @@ services:
       dockerfile: backend/services/account-service/Dockerfile
     container_name: account-service
     depends_on:
-      postgres-account:
+      mysql-account:
         condition: service_healthy
       redis:
         condition: service_healthy
       service-discovery:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-account:5432/account_db"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-account:3306/account_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: account_svc
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_ACCOUNT_PASSWORD:-account_secret_123}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_ACCOUNT_PASSWORD:-account_secret_123}
       SPRING_REDIS_HOST: redis
       SPRING_REDIS_PASSWORD: ${REDIS_PASSWORD:-redis_secret_123}
     ports:
@@ -372,16 +380,16 @@ services:
       dockerfile: backend/services/transaction-service/Dockerfile
     container_name: transaction-service
     depends_on:
-      postgres-transaction:
+      mysql-transaction:
         condition: service_healthy
       kafka:
         condition: service_healthy
       account-service:
         condition: service_started
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-transaction:5432/transaction_db"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-transaction:3306/transaction_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: transaction_svc
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_TRANSACTION_PASSWORD:-txn_secret_123}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_TRANSACTION_PASSWORD:-txn_secret_123}
       SERVICES_ACCOUNT_SERVICE_URL: "http://account-service:8083"
     ports:
       - "8084:8084"
@@ -393,14 +401,14 @@ services:
       dockerfile: backend/services/beneficiary-service/Dockerfile
     container_name: beneficiary-service
     depends_on:
-      postgres-beneficiary:
+      mysql-beneficiary:
         condition: service_healthy
       service-discovery:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-beneficiary:5432/beneficiary_db"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-beneficiary:3306/beneficiary_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: beneficiary_svc
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_BENEFICIARY_PASSWORD:-ben_secret_123}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_BENEFICIARY_PASSWORD:-ben_secret_123}
     ports:
       - "8085:8085"
 
@@ -411,14 +419,14 @@ services:
       dockerfile: backend/services/notification-service/Dockerfile
     container_name: notification-service
     depends_on:
-      postgres-notification:
+      mysql-notification:
         condition: service_healthy
       kafka:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-notification:5432/notification_db"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-notification:3306/notification_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: notification_svc
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_NOTIFICATION_PASSWORD:-notif_secret_123}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_NOTIFICATION_PASSWORD:-notif_secret_123}
       SPRING_MAIL_HOST: ${MAIL_HOST:-smtp.gmail.com}
       SPRING_MAIL_PORT: ${MAIL_PORT:-587}
       SPRING_MAIL_USERNAME: ${MAIL_USERNAME:-noreply@banking.com}
@@ -433,14 +441,14 @@ services:
       dockerfile: backend/services/fraud-service/Dockerfile
     container_name: fraud-service
     depends_on:
-      postgres-fraud:
+      mysql-fraud:
         condition: service_healthy
       kafka:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-fraud:5432/fraud_db"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-fraud:3306/fraud_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: fraud_svc
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_FRAUD_PASSWORD:-fraud_secret_123}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_FRAUD_PASSWORD:-fraud_secret_123}
     ports:
       - "8087:8087"
 
@@ -451,14 +459,14 @@ services:
       dockerfile: backend/services/audit-service/Dockerfile
     container_name: audit-service
     depends_on:
-      postgres-audit:
+      mysql-audit:
         condition: service_healthy
       kafka:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: "jdbc:postgresql://postgres-audit:5432/audit_db"
+      SPRING_DATASOURCE_URL: "jdbc:mysql://mysql-audit:3306/audit_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true"
       SPRING_DATASOURCE_USERNAME: audit_svc
-      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_AUDIT_PASSWORD:-audit_secret_123}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_AUDIT_PASSWORD:-audit_secret_123}
     ports:
       - "8088:8088"
 
@@ -516,14 +524,14 @@ networks:
 # ============================================================
 
 volumes:
-  postgres-auth-data:
-  postgres-user-data:
-  postgres-account-data:
-  postgres-transaction-data:
-  postgres-beneficiary-data:
-  postgres-notification-data:
-  postgres-fraud-data:
-  postgres-audit-data:
+  mysql-auth-data:
+  mysql-user-data:
+  mysql-account-data:
+  mysql-transaction-data:
+  mysql-beneficiary-data:
+  mysql-notification-data:
+  mysql-fraud-data:
+  mysql-audit-data:
   redis-data:
   zookeeper-data:
   zookeeper-log:

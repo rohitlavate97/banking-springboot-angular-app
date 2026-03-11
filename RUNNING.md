@@ -43,14 +43,15 @@ cp .env.example .env
 Open `.env` in any text editor and **change all the default passwords** to values you choose. The key variables are:
 
 ```
-POSTGRES_AUTH_PASSWORD=change_me
-POSTGRES_USER_PASSWORD=change_me
-POSTGRES_ACCOUNT_PASSWORD=change_me
-POSTGRES_TRANSACTION_PASSWORD=change_me
-POSTGRES_BENEFICIARY_PASSWORD=change_me
-POSTGRES_NOTIFICATION_PASSWORD=change_me
-POSTGRES_FRAUD_PASSWORD=change_me
-POSTGRES_AUDIT_PASSWORD=change_me
+MYSQL_ROOT_PASSWORD=change_me
+MYSQL_AUTH_PASSWORD=change_me
+MYSQL_USER_PASSWORD=change_me
+MYSQL_ACCOUNT_PASSWORD=change_me
+MYSQL_TRANSACTION_PASSWORD=change_me
+MYSQL_BENEFICIARY_PASSWORD=change_me
+MYSQL_NOTIFICATION_PASSWORD=change_me
+MYSQL_FRAUD_PASSWORD=change_me
+MYSQL_AUDIT_PASSWORD=change_me
 JWT_SECRET=your_256_bit_secret_here
 MAIL_HOST=smtp.gmail.com
 MAIL_PORT=587
@@ -84,7 +85,7 @@ docker compose up -d
 ```
 
 This single command starts **25 containers**:
-- 8 × PostgreSQL 16 databases (one per service)
+- 8 × MySQL 8.0 databases (one per service)
 - Redis 7.2
 - Zookeeper + Apache Kafka
 - Config Server

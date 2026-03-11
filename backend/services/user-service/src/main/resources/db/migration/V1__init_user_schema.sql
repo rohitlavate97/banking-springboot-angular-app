@@ -1,8 +1,8 @@
 -- User Service DB Schema
 
 CREATE TABLE IF NOT EXISTS user_profiles (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    auth_user_id UUID NOT NULL UNIQUE,
+    id CHAR(36) NOT NULL DEFAULT (UUID()),
+    auth_user_id CHAR(36) NOT NULL UNIQUE,
     first_name VARCHAR(100) NOT NULL DEFAULT '',
     last_name VARCHAR(100) NOT NULL DEFAULT '',
     email VARCHAR(255) NOT NULL UNIQUE,
@@ -16,10 +16,11 @@ CREATE TABLE IF NOT EXISTS user_profiles (
     postal_code VARCHAR(20),
     country VARCHAR(100),
     kyc_status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
-    kyc_verified_at TIMESTAMP,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+    kyc_verified_at DATETIME,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE INDEX IF NOT EXISTS idx_user_profiles_auth_user_id ON user_profiles(auth_user_id);
-CREATE INDEX IF NOT EXISTS idx_user_profiles_email ON user_profiles(email);
+CREATE INDEX idx_user_profiles_auth_user_id ON user_profiles(auth_user_id);
+CREATE INDEX idx_user_profiles_email ON user_profiles(email);
