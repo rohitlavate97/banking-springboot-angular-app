@@ -1,0 +1,130 @@
+<div class="page">
+  <div class="flex justify-between items-center mb-3">
+    <h2>Beneficiaries</h2>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px">
+        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Add Beneficiary
+    </button>
+  </div>
+
+  <div class="loading-container" *ngIf="loading"><div class="spinner"></div></div>
+  <div class="alert alert-error" *ngIf="error && !loading">{{ error }}</div>
+
+  <div class="card" *ngIf="!loading">
+    <div class="empty-state" *ngIf="beneficiaries.length === 0 && !error">
+      <p>No saved beneficiaries yet.</p>
+    </div>
+
+    <div class="table-responsive" *ngIf="beneficiaries.length > 0">
+      <table>
+        <thead>
+          <tr>
+            <th>Nickname</th>
+            <th>Account Holder</th>
+            <th>Account Number</th>
+            <th>Bank</th>
+            <th>Added</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of beneficiaries">
+            <td>
+              <div class="beneficiary-nickname">
+                <div class="avatar">{{ b.nickname.charAt(0).toUpperCase() }}</div>
+                {{ b.nickname }}
+              </div>
+            </td>
+            <td>{{ b.accountHolderName }}</td>
+            <td class="font-mono text-sm">{{ b.accountNumber }}</td>
+            <td>{{ b.bankName }}</td>
+            <td class="text-muted text-sm">{{ b.createdAt | date:'MMM d, y' }}</td>
+            <td>
+              <button class="btn btn-danger btn-sm"
+                (click)="onDelete(b.id, b.nickname)"
+                [disabled]="deletingId === b.id">
+                <span class="spinner spinner-sm" *ngIf="deletingId === b.id"></span>
+                <span *ngIf="deletingId !== b.id">Remove</span>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Beneficiary Modal -->
+<div class="modal-backdrop" *ngIf="showAddModal" (click)="closeAddModal()">
+  <div class="modal" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Add Beneficiary</h3>
+      <button (click)="closeAddModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="alert alert-success" *ngIf="addSuccess">{{ addSuccess }}</div>
+      <div class="alert alert-error" *ngIf="addError">{{ addError }}</div>
+
+      <form [formGroup]="addForm" (ngSubmit)="onAdd()" novalidate>
+        <div class="form-group">
+          <label class="form-label">Nickname</label>
+          <input type="text" class="form-control" formControlName="nickname"
+            [class.is-invalid]="addForm.get('nickname')?.invalid && addForm.get('nickname')?.touched"
+            placeholder="e.g. John's Savings" />
+          <span class="form-error"
+            *ngIf="addForm.get('nickname')?.invalid && addForm.get('nickname')?.touched">
+            Required, 2–50 characters.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Account Holder Name</label>
+          <input type="text" class="form-control" formControlName="accountHolderName"
+            [class.is-invalid]="addForm.get('accountHolderName')?.invalid && addForm.get('accountHolderName')?.touched"
+            placeholder="Full legal name" />
+          <span class="form-error"
+            *ngIf="addForm.get('accountHolderName')?.invalid && addForm.get('accountHolderName')?.touched">
+            Required.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Account Number</label>
+          <input type="text" class="form-control" formControlName="accountNumber"
+            [class.is-invalid]="addForm.get('accountNumber')?.invalid && addForm.get('accountNumber')?.touched"
+            placeholder="Account number" />
+          <span class="form-error"
+            *ngIf="addForm.get('accountNumber')?.invalid && addForm.get('accountNumber')?.touched">
+            Required.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bank Name</label>
+          <input type="text" class="form-control" formControlName="bankName"
+            [class.is-invalid]="addForm.get('bankName')?.invalid && addForm.get('bankName')?.touched"
+            placeholder="e.g. Bank of America" />
+          <span class="form-error"
+            *ngIf="addForm.get('bankName')?.invalid && addForm.get('bankName')?.touched">
+            Required.
+          </span>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Bank Code <span class="text-muted">(optional)</span></label>
+          <input type="text" class="form-control" formControlName="bankCode"
+            placeholder="Routing number / SWIFT / BIC" />
+        </div>
+      </form>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" (click)="onAdd()" [disabled]="adding">
+        <span class="spinner spinner-sm" *ngIf="adding"></span>
+        <span *ngIf="!adding">Add</span>
+      </button>
+    </div>
+  </div>
+</div>

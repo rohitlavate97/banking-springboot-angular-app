@@ -1,0 +1,57 @@
+server:
+  port: 8087
+
+spring:
+  application:
+    name: fraud-service
+  config:
+    import: optional:configserver:${CONFIG_SERVER_URL:http://configuser:configpassword@localhost:8888}
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:fraud_db}
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:localhost:9092}
+    consumer:
+      group-id: fraud-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.banking.*"
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL:http://eurekauser:eurekapassword@localhost:8761/eureka}
+  instance:
+    prefer-ip-address: true
+
+fraud:
+  rules:
+    large-transaction-threshold: ${FRAUD_LARGE_TXN_THRESHOLD:10000.00}
+    rapid-transfer-window-minutes: ${FRAUD_RAPID_WINDOW_MINUTES:5}
+    rapid-transfer-max-count: ${FRAUD_RAPID_MAX_COUNT:3}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus

@@ -1,0 +1,9 @@
+package com.banking.fraud.entity;
+
+public enum FraudRuleType {
+    LARGE_TRANSACTION,
+    RAPID_REPEATED_TRANSFERS,
+    NEW_BENEFICIARY_TRANSFER,
+    UNUSUAL_LOCATION,
+    MULTIPLE_FAILED_ATTEMPTS
+}

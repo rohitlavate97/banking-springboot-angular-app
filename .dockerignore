@@ -1,0 +1,14 @@
+.env
+*.jar
+*.class
+target/
+node_modules/
+dist/
+.angular/
+logs/
+*.log
+*.log.gz
+*.iml
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,83 @@
+<div class="auth-page">
+  <div class="auth-card card">
+    <div class="auth-header">
+      <div class="auth-logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="5" width="20" height="14" rx="2"/>
+          <line x1="2" y1="10" x2="22" y2="10"/>
+        </svg>
+      </div>
+      <h1>Create account</h1>
+      <p class="text-muted">Start banking with NexaBank today</p>
+    </div>
+
+    <div class="alert alert-success" *ngIf="success">
+      Account created successfully! Redirecting to login...
+    </div>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate *ngIf="!success">
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First name</label>
+          <input type="text" class="form-control"
+            [class.is-invalid]="firstName.invalid && firstName.touched"
+            formControlName="firstName" placeholder="John" autocomplete="given-name" />
+          <span class="form-error" *ngIf="firstName.invalid && firstName.touched">
+            Required, min 2 characters.
+          </span>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last name</label>
+          <input type="text" class="form-control"
+            [class.is-invalid]="lastName.invalid && lastName.touched"
+            formControlName="lastName" placeholder="Doe" autocomplete="family-name" />
+          <span class="form-error" *ngIf="lastName.invalid && lastName.touched">
+            Required, min 2 characters.
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input type="email" class="form-control"
+          [class.is-invalid]="email.invalid && email.touched"
+          formControlName="email" placeholder="you@example.com" autocomplete="email" />
+        <span class="form-error" *ngIf="email.invalid && email.touched">
+          <span *ngIf="email.errors?.['required']">Email is required.</span>
+          <span *ngIf="email.errors?.['email']">Enter a valid email address.</span>
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input type="password" class="form-control"
+          [class.is-invalid]="password.invalid && password.touched"
+          formControlName="password" placeholder="••••••••" autocomplete="new-password" />
+        <span class="form-error" *ngIf="password.invalid && password.touched">
+          Must be 8+ chars with uppercase, lowercase, number and symbol.
+        </span>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Confirm password</label>
+        <input type="password" class="form-control"
+          [class.is-invalid]="(confirmPassword.touched && form.errors?.['passwordMismatch'])"
+          formControlName="confirmPassword" placeholder="••••••••" autocomplete="new-password" />
+        <span class="form-error" *ngIf="confirmPassword.touched && form.errors?.['passwordMismatch']">
+          Passwords do not match.
+        </span>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-full btn-lg" [disabled]="loading">
+        <span class="spinner spinner-sm" *ngIf="loading"></span>
+        <span *ngIf="!loading">Create account</span>
+      </button>
+    </form>
+
+    <p class="auth-footer">
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
+    </p>
+  </div>
+</div>

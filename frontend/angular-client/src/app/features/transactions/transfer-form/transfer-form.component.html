@@ -1,0 +1,83 @@
+<div class="page">
+  <div class="flex items-center gap-2 mb-3">
+    <a routerLink="/transactions" class="btn btn-secondary btn-sm">&#8592; Back</a>
+    <h2>New Transaction</h2>
+  </div>
+
+  <div class="card form-card">
+    <!-- Action Tabs -->
+    <div class="action-tabs">
+      <button
+        *ngFor="let a of actions"
+        class="action-tab"
+        [class.active]="action === a.key"
+        (click)="setAction(a.key)"
+        type="button"
+      >{{ a.label }}</button>
+    </div>
+
+    <div class="alert alert-success" *ngIf="success">{{ success }}</div>
+    <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+    <div class="loading-container" *ngIf="loadingAccounts"><div class="spinner"></div></div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate *ngIf="!loadingAccounts">
+
+      <!-- Source Account (withdraw / transfer) -->
+      <div class="form-group" *ngIf="action === 'withdraw' || action === 'transfer'">
+        <label class="form-label">From Account</label>
+        <select class="form-control" formControlName="sourceAccountId"
+          [class.is-invalid]="form.get('sourceAccountId')?.invalid && form.get('sourceAccountId')?.touched">
+          <option value="">Select account</option>
+          <option *ngFor="let acc of accounts" [value]="acc.id">{{ formatAccount(acc) }}</option>
+        </select>
+        <span class="form-error"
+          *ngIf="form.get('sourceAccountId')?.invalid && form.get('sourceAccountId')?.touched">
+          Please select a source account.
+        </span>
+      </div>
+
+      <!-- Destination Account (deposit / transfer) -->
+      <div class="form-group" *ngIf="action === 'deposit' || action === 'transfer'">
+        <label class="form-label">{{ action === 'deposit' ? 'To Account' : 'To Account' }}</label>
+        <select class="form-control" formControlName="destinationAccountId"
+          [class.is-invalid]="form.get('destinationAccountId')?.invalid && form.get('destinationAccountId')?.touched">
+          <option value="">Select account</option>
+          <option *ngFor="let acc of accounts" [value]="acc.id">{{ formatAccount(acc) }}</option>
+        </select>
+        <span class="form-error"
+          *ngIf="form.get('destinationAccountId')?.invalid && form.get('destinationAccountId')?.touched">
+          Please select a destination account.
+        </span>
+      </div>
+
+      <!-- Amount -->
+      <div class="form-group">
+        <label class="form-label">Amount (USD)</label>
+        <input type="number" class="form-control"
+          formControlName="amount"
+          [class.is-invalid]="amount.invalid && amount.touched"
+          placeholder="0.00" min="0.01" step="0.01" />
+        <span class="form-error" *ngIf="amount.invalid && amount.touched">
+          <span *ngIf="amount.errors?.['required']">Amount is required.</span>
+          <span *ngIf="amount.errors?.['min']">Amount must be greater than 0.</span>
+        </span>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label">Description <span class="text-muted">(optional)</span></label>
+        <input type="text" class="form-control" formControlName="description"
+          placeholder="e.g. Rent payment" maxlength="255" />
+      </div>
+
+      <div class="form-actions">
+        <a routerLink="/transactions" class="btn btn-secondary">Cancel</a>
+        <button type="submit" class="btn btn-primary" [disabled]="loading">
+          <span class="spinner spinner-sm" *ngIf="loading"></span>
+          <span *ngIf="!loading">Submit</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

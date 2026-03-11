@@ -1,0 +1,139 @@
+<div class="page">
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+  </div>
+
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <ng-container *ngIf="!loading && !error">
+    <div class="dashboard-header mb-3">
+      <h2>Dashboard</h2>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid-3 mb-3">
+      <div class="card summary-card">
+        <div class="summary-icon total">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+          </svg>
+        </div>
+        <div>
+          <p class="summary-label">Total Balance</p>
+          <p class="summary-value">{{ formatCurrency(totalBalance) }}</p>
+        </div>
+      </div>
+
+      <div class="card summary-card">
+        <div class="summary-icon accounts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="2" y="5" width="20" height="14" rx="2"/>
+            <line x1="2" y1="10" x2="22" y2="10"/>
+          </svg>
+        </div>
+        <div>
+          <p class="summary-label">Active Accounts</p>
+          <p class="summary-value">{{ activeAccounts }}</p>
+        </div>
+      </div>
+
+      <div class="card summary-card">
+        <div class="summary-icon txn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+          </svg>
+        </div>
+        <div>
+          <p class="summary-label">Recent Transactions</p>
+          <p class="summary-value">{{ recentTransactions.length }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accounts Overview -->
+    <div class="grid-2 mb-3">
+      <div class="card">
+        <div class="card-header">
+          <h3>My Accounts</h3>
+          <a routerLink="/accounts" class="btn btn-secondary btn-sm">View all</a>
+        </div>
+
+        <div class="empty-state" *ngIf="accounts.length === 0">
+          <p>No accounts yet.</p>
+        </div>
+
+        <div class="account-list" *ngIf="accounts.length > 0">
+          <div class="account-item" *ngFor="let acc of accounts">
+            <div class="account-info">
+              <div class="account-type-badge">{{ acc.accountType }}</div>
+              <div class="account-number">•••• {{ acc.accountNumber.slice(-4) }}</div>
+            </div>
+            <div class="account-balance">{{ formatCurrency(acc.balance) }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Transactions</h3>
+          <a routerLink="/transactions" class="btn btn-secondary btn-sm">View all</a>
+        </div>
+
+        <div class="empty-state" *ngIf="recentTransactions.length === 0">
+          <p>No transactions yet.</p>
+        </div>
+
+        <div class="txn-list" *ngIf="recentTransactions.length > 0">
+          <div class="txn-item" *ngFor="let tx of recentTransactions">
+            <div class="txn-meta">
+              <div class="txn-type">{{ tx.transactionType }}</div>
+              <div class="txn-date text-muted text-xs">{{ tx.createdAt | date:'MMM d, h:mm a' }}</div>
+            </div>
+            <div class="txn-right">
+              <div class="txn-amount" [class.credit]="isCredit(tx)" [class.debit]="!isCredit(tx)">
+                {{ isCredit(tx) ? '+' : '-' }}{{ formatCurrency(tx.amount) }}
+              </div>
+              <span class="badge" [ngClass]="getStatusClass(tx.status)">{{ tx.status }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card">
+      <div class="card-header"><h3>Quick Actions</h3></div>
+      <div class="quick-actions">
+        <a routerLink="/transactions" [queryParams]="{action:'transfer'}" class="action-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+          Transfer
+        </a>
+        <a routerLink="/transactions" [queryParams]="{action:'deposit'}" class="action-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Deposit
+        </a>
+        <a routerLink="/transactions" [queryParams]="{action:'withdraw'}" class="action-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Withdraw
+        </a>
+        <a routerLink="/beneficiaries" class="action-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          Beneficiaries
+        </a>
+      </div>
+    </div>
+  </ng-container>
+</div>

@@ -1,0 +1,29 @@
+<nav class="navbar" *ngIf="isAuthenticated$ | async">
+  <div class="navbar-brand">
+    <a routerLink="/dashboard" class="brand-link">
+      <svg class="brand-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <line x1="2" y1="10" x2="22" y2="10"/>
+      </svg>
+      NexaBank
+    </a>
+  </div>
+
+  <button class="hamburger" (click)="toggleMenu()" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+
+  <ul class="nav-links" [class.open]="menuOpen" (click)="closeMenu()">
+    <li><a routerLink="/dashboard" routerLinkActive="active">Dashboard</a></li>
+    <li><a routerLink="/accounts" routerLinkActive="active">Accounts</a></li>
+    <li><a routerLink="/transactions" routerLinkActive="active">Transactions</a></li>
+    <li><a routerLink="/beneficiaries" routerLinkActive="active">Beneficiaries</a></li>
+    <li>
+      <button class="btn-logout" (click)="logout()">Logout</button>
+    </li>
+  </ul>
+</nav>
+
+<main class="main-content" [class.with-nav]="isAuthenticated$ | async">
+  <router-outlet></router-outlet>
+</main>

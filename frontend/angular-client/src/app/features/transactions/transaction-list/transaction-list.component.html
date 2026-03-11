@@ -1,0 +1,65 @@
+<div class="page">
+  <div class="flex justify-between items-center mb-3">
+    <h2>Transactions</h2>
+    <a routerLink="/transactions/new" class="btn btn-primary">New Transaction</a>
+  </div>
+
+  <div class="loading-container" *ngIf="loading"><div class="spinner"></div></div>
+  <div class="alert alert-error" *ngIf="error">{{ error }}</div>
+
+  <div class="card" *ngIf="!loading && !error">
+    <div class="empty-state" *ngIf="transactions.length === 0">
+      <p>No transactions found.</p>
+      <a routerLink="/transactions/new" class="btn btn-primary mt-2">Make your first transaction</a>
+    </div>
+
+    <ng-container *ngIf="transactions.length > 0">
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Type</th>
+              <th>Amount</th>
+              <th>From Account</th>
+              <th>To Account</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let tx of transactions">
+              <td>
+                <span class="tx-type-badge" [ngClass]="tx.transactionType.toLowerCase()">
+                  {{ tx.transactionType }}
+                </span>
+              </td>
+              <td>
+                <span class="tx-amount" [class.credit]="isCredit(tx)" [class.debit]="!isCredit(tx)">
+                  {{ isCredit(tx) ? '+' : '-' }}{{ formatCurrency(tx.amount) }}
+                </span>
+              </td>
+              <td class="font-mono text-sm text-muted">{{ tx.sourceAccountId || '—' }}</td>
+              <td class="font-mono text-sm text-muted">{{ tx.destinationAccountId || '—' }}</td>
+              <td><span class="badge" [ngClass]="getStatusClass(tx.status)">{{ tx.status }}</span></td>
+              <td class="text-muted text-sm">{{ tx.createdAt | date:'MMM d, y, h:mm a' }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button (click)="goToPage(currentPage - 1)" [disabled]="currentPage === 0">&#8249;</button>
+        <button
+          *ngFor="let p of pages"
+          (click)="goToPage(p)"
+          [class.active]="p === currentPage"
+        >{{ p + 1 }}</button>
+        <button (click)="goToPage(currentPage + 1)" [disabled]="currentPage >= totalPages - 1">&#8250;</button>
+      </div>
+
+      <p class="results-info text-muted text-sm">
+        Showing {{ transactions.length }} of {{ totalElements }} transactions
+      </p>
+    </ng-container>
+  </div>
+</div>

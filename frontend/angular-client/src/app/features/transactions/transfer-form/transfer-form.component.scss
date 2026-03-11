@@ -1,0 +1,40 @@
+.form-card {
+  max-width: 540px;
+}
+
+.action-tabs {
+  display: flex;
+  gap: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+
+  .action-tab {
+    flex: 1;
+    padding: 0.625rem 1rem;
+    background: var(--surface);
+    border: none;
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: background 0.15s, color 0.15s;
+    border-right: 1px solid var(--border);
+
+    &:last-child { border-right: none; }
+    &:hover { background: var(--surface-2); }
+
+    &.active {
+      background: var(--primary);
+      color: #fff;
+    }
+  }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}

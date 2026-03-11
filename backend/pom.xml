@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.banking</groupId>
+        <artifactId>banking-platform</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <artifactId>banking-backend</artifactId>
+    <packaging>pom</packaging>
+    <name>Banking Platform - Backend</name>
+
+    <modules>
+        <module>infrastructure/config-server</module>
+        <module>infrastructure/service-discovery</module>
+        <module>infrastructure/api-gateway</module>
+        <module>services/auth-service</module>
+        <module>services/user-service</module>
+        <module>services/account-service</module>
+        <module>services/transaction-service</module>
+        <module>services/beneficiary-service</module>
+        <module>services/notification-service</module>
+        <module>services/fraud-service</module>
+        <module>services/audit-service</module>
+    </modules>
+</project>

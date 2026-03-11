@@ -1,0 +1,112 @@
+.summary-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+
+  .summary-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    svg { width: 22px; height: 22px; }
+
+    &.total    { background: var(--primary-subtle); color: var(--primary); }
+    &.accounts { background: var(--success-subtle); color: var(--success); }
+    &.txn      { background: var(--warning-subtle); color: var(--warning); }
+  }
+
+  .summary-label { font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.25rem; }
+  .summary-value { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); }
+}
+
+.account-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .account-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+
+    .account-type-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-subtle);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-bottom: 0.25rem;
+      display: inline-block;
+    }
+
+    .account-number { font-size: 0.85rem; color: var(--text-secondary); font-family: monospace; }
+    .account-balance { font-weight: 700; font-size: 1.05rem; }
+  }
+}
+
+.txn-list {
+  display: flex;
+  flex-direction: column;
+
+  .txn-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+
+    &:last-child { border-bottom: none; }
+
+    .txn-type { font-size: 0.875rem; font-weight: 500; margin-bottom: 0.25rem; }
+
+    .txn-right {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.25rem;
+    }
+
+    .txn-amount {
+      font-weight: 600;
+      font-size: 0.9rem;
+      &.credit { color: var(--success); }
+      &.debit  { color: var(--danger); }
+    }
+  }
+}
+
+.quick-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  .action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    text-decoration: none;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: background 0.15s, border-color 0.15s;
+    flex: 1;
+    min-width: 100px;
+
+    svg { width: 22px; height: 22px; color: var(--primary); }
+
+    &:hover { background: var(--primary-subtle); border-color: var(--primary); }
+  }
+}

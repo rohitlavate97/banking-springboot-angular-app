@@ -1,0 +1,118 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    environment: 'production'
+
+rule_files:
+  - "alert_rules.yml"
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - alertmanager:9093
+
+scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  - job_name: 'config-server'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['config-server:8888']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: config-server
+
+  - job_name: 'service-discovery'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['service-discovery:8761']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: service-discovery
+
+  - job_name: 'api-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['api-gateway:8080']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: api-gateway
+
+  - job_name: 'auth-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['auth-service:8081']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: auth-service
+
+  - job_name: 'user-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['user-service:8082']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: user-service
+
+  - job_name: 'account-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['account-service:8083']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: account-service
+
+  - job_name: 'transaction-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['transaction-service:8084']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: transaction-service
+
+  - job_name: 'beneficiary-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['beneficiary-service:8085']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: beneficiary-service
+
+  - job_name: 'notification-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['notification-service:8086']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: notification-service
+
+  - job_name: 'fraud-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['fraud-service:8087']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: fraud-service
+
+  - job_name: 'audit-service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['audit-service:8088']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: service
+        replacement: audit-service

@@ -1,0 +1,8 @@
+package com.banking.account.entity;
+
+public enum AccountStatus {
+    ACTIVE,
+    INACTIVE,
+    SUSPENDED,
+    CLOSED
+}
